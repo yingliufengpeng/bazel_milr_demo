@@ -76,3 +76,21 @@ namespace mlir::peng {
         printer << ">";
     }
 }  // namespace mlir::north_star
+
+
+namespace mlir::peng {
+
+    ::llvm::LogicalResult BufferType::verify(
+        ::llvm::function_ref<::mlir::InFlightDiagnostic()> emitError,
+        ::llvm::ArrayRef<int64_t> devices) {
+        if (std::set(devices.begin(), devices.end()).size() != devices.size())
+            return emitError() << "Duplicate device ids";
+        for (auto id : devices) {
+            if (id < 0) {
+                return emitError() << "Invalid device id";
+            }
+        }
+        return llvm::success();
+    }
+
+}

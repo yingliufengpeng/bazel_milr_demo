@@ -89,6 +89,12 @@ void CH3() {
 
     llvm::outs() << "const_4  " << const_4 << "\n";
 
+    // Buffer Op
+    auto buffer_op = builder.create<mlir::peng::BufferOp>(
+        loc, mlir::ValueRange({const_2, const_4, }));
+    llvm::outs() << "buffer_op  " << buffer_op << "\n";
+
+
 }
 
 

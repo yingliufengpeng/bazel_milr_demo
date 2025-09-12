@@ -59,6 +59,27 @@ def Peng_TensorType : Peng_Type<"PTensor","p_tensor",[]>{
 }
 
 
+def Peng_BufferType : Peng_Type<"Buffer","buffer",[]>{
+  let summary = " the summary of north-star buffer type";
+
+  let description = "description of north-star buffer type";
+
+  let parameters = (ins
+    ArrayRefParameter<"int64_t">:$devices
+  );
+
+  let genStorageClass = 1;
+
+  let hasStorageCustomConstructor = 0;
+
+  let assemblyFormat = "`<`$devices`>`";
+
+  let skipDefaultBuilders = 0;
+
+  let genVerifyDecl = 1;
+}
+
+
 
 
 #endif // DIALECT_PENG_TYPE

@@ -44,7 +44,30 @@ def Peng_ConstOp : Peng_Op<"const",[]>{
     let arguments = (ins
         ElementsAttr:$value);
     let results = (outs
-        AnyNSTensor:$result);
+        AnyPTensor:$result);
+}
+
+def Peng_BufferOp : Peng_Op<"buffer",[]>{
+    let description = "将 多个device_id 的tensor 组合成 一个 buffer";
+    let arguments = (ins
+        Variadic<AnyPTensor>:$tensors
+    );
+    let results = (outs
+        AnyBuffer:$result);
+    let hasVerifier = 1;
+    let builders = [
+        OpBuilder<(ins "::mlir::ValueRange":$tensors) ,
+            [{
+                $_state.addOperands(tensors);
+                ::llvm::SmallVector<int64_t> devices;
+                for (auto tensor : tensors) {
+                    auto tensor_type =
+                        llvm::cast<::mlir::peng::PTensorType>(tensor.getType());
+                    devices.push_back(tensor_type.getDeviceId());
+                }
+                $_state.addTypes(::mlir::peng::BufferType::get($_state.getContext(), devices));
+            }]>
+    ];
 }
 
 
