@@ -71,4 +71,29 @@ def Peng_BufferOp : Peng_Op<"buffer",[]>{
 }
 
 
+def Peng_GetTensorOp: Peng_Op<"get_tensor",[]>{
+    let description = "从buffer中取出指定device_id的tensor";
+    let arguments = (ins
+        AnyBuffer:$buffer,
+        I64Attr:$device_id
+    );
+    let results = (outs
+        AnyPTensor:$result);
+    let hasVerifier = 1;
+}
+
+def Peng_SoftmaxOp : Peng_UnaryOp<"softmax",AnyPTensor, AnyPTensor, [], (ins I64Attr:$axis)>{
+    let hasVerifier = 1;
+    let builders = [
+        OpBuilder<(ins "::mlir::Value":$input, "int64_t":$axis) ,
+            [{
+                $_state.addOperands(input);
+                $_state.getOrAddProperties<Properties>().axis = $_builder.getIntegerAttr(odsBuilder.getIntegerType(64,true), axis);
+                $_state.addTypes(input.getType());
+            }]>
+
+    ];
+}
+
+
 #endif // DIALECT_PENG_OPS_TD

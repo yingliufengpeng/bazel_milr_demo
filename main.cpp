@@ -95,6 +95,17 @@ void CH3() {
     llvm::outs() << "buffer_op  " << buffer_op << "\n";
 
 
+    // Get Tensor Op
+    auto get_tensor_op_1 = builder.create<mlir::peng::GetTensorOp>(
+        loc, tensor_type_1, buffer_op, 0);
+
+    llvm::outs() << "get_tensor_op_1  " << get_tensor_op_1 << "\n";
+
+    auto get_tensor_op_2 = builder.create<mlir::peng::GetTensorOp>(
+        loc, tensor_type_2, buffer_op, 1);
+    llvm::outs() << "get_tensor_op_2  " << get_tensor_op_2 << "\n";
+
+
 }
 
 
