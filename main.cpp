@@ -105,7 +105,23 @@ void CH3() {
         loc, tensor_type_2, buffer_op, 1);
     llvm::outs() << "get_tensor_op_2  " << get_tensor_op_2 << "\n";
 
+    auto exp_op = builder.create<mlir::peng::ExpOp>(loc, get_tensor_op_2);
+    llvm::outs() << "exp_op  " << exp_op << "\n";
 
+    auto add_op = builder.create<mlir::peng::AddOp>(loc, get_tensor_op_1, get_tensor_op_2);
+    llvm::outs() << "add_op  " << add_op << "\n";
+
+    auto sub_op = builder.create<mlir::peng::SubOp>(loc, get_tensor_op_1, get_tensor_op_2);
+    llvm::outs() << "sub_op  " << sub_op << "\n";
+
+    auto out_buffer_op = builder.create<mlir::peng::BufferOp>(
+        loc, mlir::ValueRange({const_2, const_4}));
+    auto all_to_all_op = builder.create<mlir::peng::AllToAllOp>(
+    loc, buffer_op, out_buffer_op);
+    llvm::outs() << "all_to_all_op  " << all_to_all_op << "\n";
+
+    auto print_op = builder.create<mlir::peng::PrintOp>(loc, const_1);
+    llvm::outs() << "print_op  " << print_op << "\n";
 }
 
 
