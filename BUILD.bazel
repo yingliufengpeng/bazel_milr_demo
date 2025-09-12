@@ -26,6 +26,32 @@ interface_name = gentbl_cc_lib("gen", "op-interface", "DistributeParallelismOpIn
 interface_attr_name = gentbl_cc_lib("gen", "attr-interface", "DistributeParallelismAttrInterfaces", [":td_files", ":{}".format(dialect_name)])
 
 
+cc_library(
+    name = "utils",
+    srcs = glob(["src/Utils/*.cpp"]),
+    hdrs = glob(["include/Utils/*.h"]),
+    deps = [
+       # LLVM Support 库（基础设施：StringRef、raw_ostream、ErrorHandling…）
+       "@llvm-project//llvm:Support",
+
+       # LLVM Core 库（IR 相关：Module, Function, Type …）
+       "@llvm-project//llvm:Core",
+
+       # LLVM Analysis 模块
+       "@llvm-project//llvm:Analysis",
+
+       # LLVM IRReader（解析 .ll 文件 -> LLVM IR Module）
+       "@llvm-project//llvm:IRReader",
+
+       # LLVM Pass framework
+#       "@llvm-project//llvm:Passes",
+
+        "@llvm-project//mlir:IR",          # 提供 IR/AsmState.h 及相关类
+        "@llvm-project//mlir:Parser",    # 提供 Parser/Parser.h
+
+   ]
+)
+
 
 cc_library(
     name = "lib",
@@ -43,10 +69,14 @@ cc_library(
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:TensorDialect",
         "@llvm-project//mlir:FuncDialect",
+        "@llvm-project//mlir:AffineDialect",
+        "@llvm-project//mlir:SCFDialect",
+        "@llvm-project//mlir:LinalgDialect",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferIntRangeInterface",
         "@llvm-project//mlir:InferTypeOpInterface",
         "@llvm-project//mlir:Support",
+        ":utils",
     ],
 )
 
