@@ -1,0 +1,44 @@
+load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
+load(":gentbl_cc_lib.bzl", "gentbl_cc_lib")
+
+td_library(
+    name = "td_files",
+    srcs = glob(["include/*.td"]),
+    deps = [
+        "@llvm-project//mlir:BuiltinDialectTdFiles",
+        "@llvm-project//mlir:InferIntRangeInterfaceTdFiles",
+        "@llvm-project//mlir:InferTypeOpInterfaceTdFiles",
+        "@llvm-project//mlir:OpBaseTdFiles",
+        "@llvm-project//mlir:SideEffectInterfacesTdFiles",
+    ],
+)
+
+dialect_name = gentbl_cc_lib("gen", "dialect", "PengDialect", [":td_files"])
+
+print('dialect name is {}'.format(dialect_name))
+
+
+cc_library(
+    name = "lib",
+    srcs = glob(["src/*.cpp"]),
+    hdrs = glob(["include/*.h"]),
+    deps = [
+        ":{}".format(dialect_name),
+        "@llvm-project//mlir:ComplexDialect",
+        "@llvm-project//mlir:Dialect",
+        "@llvm-project//mlir:TensorDialect",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:InferIntRangeInterface",
+        "@llvm-project//mlir:InferTypeOpInterface",
+        "@llvm-project//mlir:Support",
+    ],
+)
+
+
+cc_binary(
+    name = "main",
+    srcs = ["main.cpp"],
+    deps = [
+        ":lib",
+    ],
+)
