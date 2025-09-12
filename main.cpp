@@ -253,7 +253,7 @@ void IR_Struct() {
     if (mlir::utils::file::ParseStr<mlir::ModuleOp>(context, module, ir).failed())
         llvm::outs() << " parse ir string failed!\n";
     auto file = std::filesystem::current_path() / "ir_struct.mlir";
-    if (mlir::utils::file::PrintToFile(module.get(), file.c_str()).failed()) {
+    if (mlir::utils::file::dumpToFile(module.get(), file).failed()) {
         llvm::outs() << "print module error!";
     }
 }

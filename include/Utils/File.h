@@ -19,6 +19,12 @@
 #include "mlir/Parser/Parser.h"
 namespace mlir::utils::file {
 
+    template <class OpTy = Operation*>
+    mlir::LogicalResult dumpToFile(OpTy op, const std::filesystem::path &path) {
+        std::string utf8Path = path.string();  // 在 Windows 下会做编码转换
+        return mlir::utils::file::PrintToFile(op, utf8Path.c_str());
+    }
+
 template <class OpTy = Operation*>
 inline llvm::LogicalResult PrintToFile(OpTy op, const char* file) {
   std::error_code error_code;
