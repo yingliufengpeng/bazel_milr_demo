@@ -7,6 +7,7 @@
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/IR/MLIRContext.h"
 #include "PengEnums.h"
+#include "DistributeParallelismInterfaces.h"
 #define GET_ATTRDEF_CLASSES
 #include "PengAttrs.h.inc"
 

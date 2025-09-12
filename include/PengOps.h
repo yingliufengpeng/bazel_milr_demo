@@ -6,6 +6,7 @@
 #define BAZEL_MLIR_DEMO_PENGOPS_H
 
 #include "PengTypes.h"
+#include "DistributeParallelismInterfaces.h"
 #define GET_OP_CLASSES
 #include "PengOps.h.inc"
 #endif //BAZEL_MLIR_DEMO_PENGOPS_H

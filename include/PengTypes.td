@@ -15,7 +15,7 @@ class Peng_Type<string name, string typeMnemonic, list<Trait> traits = [],
 }
 
 
-def Peng_TensorType : Peng_Type<"PTensor","p_tensor",[]>{
+def NorthStar_TensorType : Peng_Type<"PTensor","p_tensor",[ShapedTypeInterface],"::mlir::TensorType">{
   // 概述
   let summary = " the summary of peng tensor type";
 
@@ -45,7 +45,7 @@ def Peng_TensorType : Peng_Type<"PTensor","p_tensor",[]>{
   ];
 
   let hasCustomAssemblyFormat = 1;
-//   let assemblyFormat = "`<`$shape`,`$elementType`,`$device_id`>`";
+  // let assemblyFormat = "`<`$shape`,`$elementType`,`$device_id`>`";
 
   // 跳过默认的builder函数
   let skipDefaultBuilders = 0;
@@ -54,8 +54,36 @@ def Peng_TensorType : Peng_Type<"PTensor","p_tensor",[]>{
   let genVerifyDecl = 1;
 
   let extraClassDeclaration = [{
+    using ::mlir::ShapedType::Trait<PTensorType>::getElementTypeBitWidth;
+    using ::mlir::ShapedType::Trait<PTensorType>::getRank;
+    using ::mlir::ShapedType::Trait<PTensorType>::getNumElements;
+    using ::mlir::ShapedType::Trait<PTensorType>::isDynamicDim;
+    using ::mlir::ShapedType::Trait<PTensorType>::hasStaticShape;
+    using ::mlir::ShapedType::Trait<PTensorType>::getNumDynamicDims;
+    using ::mlir::ShapedType::Trait<PTensorType>::getDimSize;
+    using ::mlir::ShapedType::Trait<PTensorType>::getDynamicDimIndex;
 
-  }];
+    ::mlir::ShapedType cloneWith(::std::optional<::llvm::ArrayRef<int64_t>> shape, ::mlir::Type type){
+        if(shape)
+          return mlir::peng::PTensorType::get(getContext(), *shape, type);
+        return mlir::peng::PTensorType::get(getContext(), getShape(), type);
+    }
+    PTensorType clone(::mlir::ArrayRef<int64_t> shape,int64_t device_id) const {
+      return PTensorType::get(getContext(), shape, getElementType(),device_id);
+    }
+    PTensorType clone(::mlir::ArrayRef<int64_t> shape, ::mlir::Type elementType) const {
+      return PTensorType::get(getContext(), shape, elementType,getDeviceId());
+    }
+    PTensorType clone(::mlir::ArrayRef<int64_t> shape) const {
+      return PTensorType::get(getContext(), shape, getElementType(),getDeviceId());
+    }
+    PTensorType clone(::mlir::Type elementType) const {
+      return PTensorType::get(getContext(), getShape(), elementType,getDeviceId());
+    }
+    PTensorType clone() const {
+      return PTensorType::get(getContext(), getShape(), getElementType(),getDeviceId());
+    }
+    }];
 }
 
 

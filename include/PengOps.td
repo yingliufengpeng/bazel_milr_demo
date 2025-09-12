@@ -7,6 +7,9 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 
 include "PengDialect.td"
 include "PengConstraints.td"
+include "DistributeParallelismAttrInterfaces.td"
+include "DistributeParallelismOpInterfaces.td"
+include "PengConstraints.td"
 
 class Peng_Op<string mnemonic, list<Trait> traits = []>
     : Op<Peng_Dialect, mnemonic, traits> {
@@ -17,7 +20,7 @@ class Peng_Op<string mnemonic, list<Trait> traits = []>
 
 
 class Peng_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
-    Peng_Op<mnemonic, traits#[]>{
+    Peng_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits#[]>{
     let arguments = !con((ins
         OperandType:$input),
         attributes
@@ -29,7 +32,7 @@ class Peng_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandTy
 
 
 class Peng_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
-    Peng_Op<mnemonic, traits#[]>{
+    Peng_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits#[]>{
     let arguments = !con((ins
         OperandType:$lhs,
         OperandType:$rhs),
@@ -55,6 +58,14 @@ class Peng_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandT
 //      let hasCanonicalizer = 1;
 }
 
+class Peng_ElewiseUnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+    Peng_UnaryOp<mnemonic, OperandType, resultType, [DeclareOpInterfaceMethods<SupportedDataParallelismOp>] # traits, attributes>;
+
+class Peng_ElewiseBinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+    Peng_BinaryOp<mnemonic, OperandType, resultType, [DeclareOpInterfaceMethods<SupportedDataParallelismOp>] # traits,attributes>;
+
+
+
 def Peng_ConstOp : Peng_Op<"const",[]>{
     let arguments = (ins
         ElementsAttr:$value);
@@ -62,7 +73,7 @@ def Peng_ConstOp : Peng_Op<"const",[]>{
         AnyPTensor:$result);
 }
 
-def Peng_ExpOp : Peng_UnaryOp<"exp",AnyPTensor>{
+def Peng_ExpOp : Peng_ElewiseUnaryOp<"exp",AnyPTensor>{
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input) ,
             [{
@@ -73,10 +84,22 @@ def Peng_ExpOp : Peng_UnaryOp<"exp",AnyPTensor>{
 }
 
 
-def Peng_AddOp : Peng_BinaryOp<"add",AnyPTensor>;
-def Peng_SubOp : Peng_BinaryOp<"sub",AnyPTensor>;
-def Peng_MulOp : Peng_BinaryOp<"mul",AnyPTensor>;
-def Peng_DivOp : Peng_BinaryOp<"div",AnyPTensor>;
+def Peng_AddOp : Peng_ElewiseBinaryOp<"add",AnyPTensor>;
+def Peng_SubOp : Peng_ElewiseBinaryOp<"sub",AnyPTensor>;
+def Peng_MulOp : Peng_ElewiseBinaryOp<"mul",AnyPTensor>;
+def Peng_DivOp : Peng_ElewiseBinaryOp<"div",AnyPTensor>;
+
+
+def Peng_BufferCastOp : Peng_Op<"buffer_cast",[]>{
+    let description = "对数据切分的标记";
+    let arguments = (ins
+        Variadic<PTensorOrBuffer>:$inputs,
+        DistributeParallelAttr:$distribute_attr
+    );
+    let results = (outs
+        Variadic<PTensorOrBuffer>:$outputs);
+    let hasVerifier = 1;
+}
 
 
 def Peng_BufferOp : Peng_Op<"buffer",[]>{
@@ -114,7 +137,7 @@ def Peng_GetTensorOp: Peng_Op<"get_tensor",[]>{
     let hasVerifier = 1;
 }
 
-def Peng_SoftmaxOp : Peng_UnaryOp<"softmax",AnyPTensor, AnyPTensor, [], (ins I64Attr:$axis)>{
+def Peng_SoftmaxOp : Peng_UnaryOp<"softmax",AnyPTensor, AnyPTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>], (ins I64Attr:$axis)>{
     let hasVerifier = 1;
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input, "int64_t":$axis) ,

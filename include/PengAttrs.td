@@ -5,6 +5,7 @@
 include "mlir/IR/EnumAttr.td"
 include "PengEnums.td"
 include "PengDialect.td"
+include "DistributeParallelismAttrInterfaces.td"
 
 
 class Peng_Attr<string name, string attrMnemonic, list<Trait> traits = [],
@@ -18,11 +19,22 @@ class Peng_Attr<string name, string attrMnemonic, list<Trait> traits = [],
   let genVerifyDecl = 0;
 }
 
-def Peng_DataParallelism: Peng_Attr<"DataParallelism", "DP", []>{
-  let parameters = (ins "int64_t":$DP_nums);
+def Peng_DataParallelism: Peng_Attr<"DataParallelism", "DP", [DataParallelAttr]>{
+  let parameters = (ins "int64_t":$DP_nums, ArrayRefParameter<"int64_t">:$devices);
+  let builders = [
+    AttrBuilder<(ins "int64_t":$DP_nums),
+    [{
+      llvm::SmallVector<int64_t> device_ids;
+      for (auto i : llvm::index_range(0, DP_nums)) {
+        device_ids.push_back(i);
+      }
+      return $_get($_ctxt, DP_nums, device_ids);
+    }]
+    >
+  ];
   let assemblyFormat = [{
     `<`
-      `DP` `=` $DP_nums
+      `DP` `=` $DP_nums `:` $devices
     `>`
   }];
 }

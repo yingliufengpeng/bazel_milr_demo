@@ -10,5 +10,5 @@ def AnyPTensor : Type<And<[CPred<"::mlir::isa<::mlir::peng::PTensorType>($_self)
 def AnyBuffer  : Type<And<[CPred<"::mlir::isa<::mlir::peng::BufferType>($_self)">,
                             CPred<"::mlir::cast<::mlir::peng::BufferType>($_self).getDevices().size() > 0">]>>;
 
-//def NSTensorOrBuffer :AnyTypeOf<[AnyNSTensor,AnyBuffer]>;
+def PTensorOrBuffer :AnyTypeOf<[AnyPTensor,AnyBuffer]>;
 #endif // DIALECT_PENG_CONSTRAINTS_TD 

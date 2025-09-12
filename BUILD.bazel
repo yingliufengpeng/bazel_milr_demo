@@ -22,6 +22,8 @@ attrs_name = gentbl_cc_lib("gen", "attrdef", "PengAttrs", [
 #    ":{}".format(enums_name),
     ])
 ops_name = gentbl_cc_lib("gen", "op", "PengOps", [":td_files", ":{}".format(dialect_name)])
+interface_name = gentbl_cc_lib("gen", "op-interface", "DistributeParallelismOpInterfaces", [":td_files", ":{}".format(dialect_name)])
+interface_attr_name = gentbl_cc_lib("gen", "attr-interface", "DistributeParallelismAttrInterfaces", [":td_files", ":{}".format(dialect_name)])
 
 
 
@@ -35,9 +37,12 @@ cc_library(
         ":{}".format(enums_name),
         ":{}".format(attrs_name),
         ":{}".format(ops_name),
+        ":{}".format(interface_name),
+        ":{}".format(interface_attr_name),
         "@llvm-project//mlir:ComplexDialect",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:TensorDialect",
+        "@llvm-project//mlir:FuncDialect",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferIntRangeInterface",
         "@llvm-project//mlir:InferTypeOpInterface",
