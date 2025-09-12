@@ -7,6 +7,7 @@
 #include "include/PengAttrs.h"
 #include "include/PengEnums.h"
 #include "include/PengAttrs.h"
+#include "include/PengOps.h"
 
 
 void CH2() {
@@ -35,4 +36,60 @@ void CH2() {
     layout_atrr.dump();
 }
 
-int main() { CH2(); }
+void CH3() {
+
+    mlir::DialectRegistry DialectRegistry;
+    mlir::MLIRContext context(DialectRegistry);
+    auto diaglect = context.getOrLoadDialect<mlir::peng::PengDialect>();
+
+    mlir::OpBuilder builder(&context);
+    auto loc = builder.getUnknownLoc();
+
+
+    // ModuleOp
+    auto module = builder.create<mlir::ModuleOp>(loc, "PengDialect");
+    builder.setInsertionPointToStart(module.getBody());
+    // ConstOp
+    auto f32 = mlir::Float32Type::get(&context);
+    auto shape = mlir::SmallVector<int64_t>({2, 2});
+    auto const_value_1 =
+        mlir::SmallVector<llvm::APFloat>(4, llvm::APFloat((float)1));
+    auto const_value_2 =
+        mlir::SmallVector<llvm::APFloat>(4, llvm::APFloat((float)2));
+    auto tensor_type_1 =
+        mlir::peng::PTensorType::get(&context, shape, f32, 0);
+    auto tensor_type_2 =
+        mlir::peng::PTensorType::get(&context, shape, f32, 1);
+    auto const_1 = builder.create<mlir::peng::ConstOp>(
+        loc, tensor_type_1,
+        mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                     const_value_1));
+
+    llvm::outs() << "const_1  " << const_1 << "\n";
+
+    auto const_2 = builder.create<mlir::peng::ConstOp>(
+    loc, tensor_type_1,
+    mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                 const_value_1));
+
+    llvm::outs() << "const_2  " << const_2 << "\n";
+
+
+    auto const_3 = builder.create<mlir::peng::ConstOp>(
+    loc, tensor_type_2,
+    mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                 const_value_2));
+
+    llvm::outs() << "const_3  " << const_3 << "\n";
+
+    auto const_4 = builder.create<mlir::peng::ConstOp>(
+        loc, tensor_type_2,
+        mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                     const_value_2));
+
+    llvm::outs() << "const_4  " << const_4 << "\n";
+
+}
+
+
+int main() { CH3(); }

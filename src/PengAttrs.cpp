@@ -9,9 +9,9 @@
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/Support/LLVM.h"
-#include "include/PengAttrs.h"
 #include "mlir/IR/Attributes.h"
 #include "include/PengDialect.h"
+#include "include/PengAttrs.h"
 
 #define GET_ATTRDEF_CLASSES
 #include "PengAttrs.cpp.inc"

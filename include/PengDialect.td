@@ -18,6 +18,7 @@ def Peng_Dialect : Dialect {
       void sayHello();
       void registerTypes();
       void registerAttrs();
+      void registerOps();
     }];
 
     // 使用MLIR默认的类型解析输出.

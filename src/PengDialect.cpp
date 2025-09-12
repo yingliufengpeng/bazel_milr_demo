@@ -12,6 +12,7 @@ void mlir::peng::PengDialect::initialize() {
     llvm::outs() << "initialize " << getDialectNamespace() << "  Type\n";
     registerTypes();
     registerAttrs();
+    registerOps();
 
 }
 

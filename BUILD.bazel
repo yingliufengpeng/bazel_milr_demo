@@ -21,6 +21,7 @@ attrs_name = gentbl_cc_lib("gen", "attrdef", "PengAttrs", [
     ":{}".format(dialect_name),
 #    ":{}".format(enums_name),
     ])
+ops_name = gentbl_cc_lib("gen", "op", "PengOps", [":td_files", ":{}".format(dialect_name)])
 
 
 
@@ -33,6 +34,7 @@ cc_library(
         ":{}".format(types_name),
         ":{}".format(enums_name),
         ":{}".format(attrs_name),
+        ":{}".format(ops_name),
         "@llvm-project//mlir:ComplexDialect",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:TensorDialect",
