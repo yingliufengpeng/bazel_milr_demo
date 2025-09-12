@@ -3,6 +3,8 @@
 
 #include "include/PengDialect.h"
 #include "include/PengTypes.h"
+#include "include/PengAttrs.h"
+#include "include/PengEnums.h"
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/IR/MLIRContext.h"
 
@@ -17,11 +19,15 @@ void CH2() {
     auto peng_tensor = mlir::peng::PTensorType::get(&context, {3, 4}, mlir::Float64Type::get(&context), 3);
     llvm::outs() << "peng_tensor" << "\t";
     peng_tensor.dump();
-    // llvm::outs() << "\n";
+    llvm::outs() << "\n";
+    mlir::peng::Layout m = mlir::peng::Layout::LEFT;
+    llvm::outs() <<  "enum left is " << m << "\t" << "\n";
 
-    // auto m = mlir::peng::stringifyBinaryOp(mlir::peng::BinaryOp::Add);
-    //
-    // llvm::outs() << "m" << "\t" << m << "\n";
+    // DataParallelismAttr
+    auto dp_attr = mlir::peng::DataParallelismAttr::get(&context, 2);
+    llvm::outs() << "DataParallelism Attribute :\t";
+    dp_attr.dump();
+
 }
 
 int main() { CH2(); }

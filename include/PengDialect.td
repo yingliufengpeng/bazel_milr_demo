@@ -17,14 +17,15 @@ def Peng_Dialect : Dialect {
     let extraClassDeclaration = [{
       void sayHello();
       void registerTypes();
+      void registerAttrs();
     }];
 
     // 使用MLIR默认的类型解析输出.
     let useDefaultTypePrinterParser  = 1;
 
-
-    // 使用MLIR默认的属性解析输出.
-  let useDefaultAttributePrinterParser = 0;
+//
+//    // 使用MLIR默认的属性解析输出.
+  let useDefaultAttributePrinterParser = 1;
 
 }
 
