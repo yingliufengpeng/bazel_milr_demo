@@ -1,12 +1,13 @@
 
 #include <iostream>
-
+#include "mlir/IR/DialectRegistry.h"
+#include "mlir/IR/MLIRContext.h"
 #include "include/PengDialect.h"
 #include "include/PengTypes.h"
 #include "include/PengAttrs.h"
 #include "include/PengEnums.h"
-#include "mlir/IR/DialectRegistry.h"
-#include "mlir/IR/MLIRContext.h"
+#include "include/PengAttrs.h"
+
 
 void CH2() {
     mlir::DialectRegistry DialectRegistry;
@@ -24,10 +25,14 @@ void CH2() {
     llvm::outs() <<  "enum left is " << m << "\t" << "\n";
 
     // DataParallelismAttr
-    auto dp_attr = mlir::peng::DataParallelismAttr::get(&context, 2);
+    auto dp_attr = mlir::peng::DataParallelismAttr::get(&context, 3);
     llvm::outs() << "DataParallelism Attribute :\t";
     dp_attr.dump();
 
+    auto layout_atrr = mlir::peng::LayoutAttr::get(&context, m);
+
+    llvm::outs() << "DataParallelism Attribute :\t";
+    layout_atrr.dump();
 }
 
 int main() { CH2(); }

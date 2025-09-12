@@ -16,7 +16,11 @@ td_library(
 dialect_name = gentbl_cc_lib("gen", "dialect", "PengDialect", [":td_files"])
 types_name = gentbl_cc_lib("gen", "typedef", "PengTypes", [":td_files", ":{}".format(dialect_name)])
 enums_name = gentbl_cc_lib("gen", "enum", "PengEnums", [":td_files", ":{}".format(dialect_name)])
-attrs_name = gentbl_cc_lib("gen", "attrdef", "PengAttrs", [":td_files", ":{}".format(dialect_name)])
+attrs_name = gentbl_cc_lib("gen", "attrdef", "PengAttrs", [
+    ":td_files",
+    ":{}".format(dialect_name),
+#    ":{}".format(enums_name),
+    ])
 
 
 

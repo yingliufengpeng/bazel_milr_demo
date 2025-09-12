@@ -3,6 +3,7 @@
 #define DIALECT_PENG_ATTRS_TD
 
 include "mlir/IR/EnumAttr.td"
+include "PengEnums.td"
 include "PengDialect.td"
 
 
@@ -24,6 +25,14 @@ def Peng_DataParallelism: Peng_Attr<"DataParallelism", "DP", []>{
       `DP` `=` $DP_nums
     `>`
   }];
+}
+
+def Peng_LayoutAttr : EnumAttr<Peng_Dialect, Peng_Layout, "LayoutAttr"> {
+    let assemblyFormat = "`<` $value `>`";
+
+    let extraClassDeclaration = [{
+    bool isLeft();
+    }];
 }
 
 #endif //DIALECT_PENG_ATTRS_TD

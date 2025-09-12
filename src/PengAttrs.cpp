@@ -10,11 +10,10 @@
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/Support/LLVM.h"
 #include "include/PengAttrs.h"
-
-#define GET_ATTRDEF_CLASSES
 #include "mlir/IR/Attributes.h"
 #include "include/PengDialect.h"
 
+#define GET_ATTRDEF_CLASSES
 #include "PengAttrs.cpp.inc"
 
 
@@ -26,5 +25,9 @@ namespace mlir::peng {
           #define GET_ATTRDEF_LIST
           #include "PengAttrs.cpp.inc"
             >();
+    }
+
+    bool LayoutAttr::isLeft() {
+        return true;
     }
 }
