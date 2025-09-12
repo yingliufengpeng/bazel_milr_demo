@@ -9,13 +9,11 @@
 #include "PengDialect.cpp.inc"
 
 void mlir::peng::PengDialect::initialize() {
-
+    llvm::outs() << "initialize " << getDialectNamespace() << "  Type\n";
+    registerTypes();
 
 }
-// 实现方言的析构函数
-mlir::peng::PengDialect::~PengDialect() {
-    llvm::outs() << "destroying " << getDialectNamespace() << "\n";
-}
+
 
 namespace mlir::peng {
 

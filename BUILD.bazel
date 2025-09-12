@@ -14,8 +14,8 @@ td_library(
 )
 
 dialect_name = gentbl_cc_lib("gen", "dialect", "PengDialect", [":td_files"])
+types_name = gentbl_cc_lib("gen", "typedef", "PengTypes", [":td_files", ":{}".format(dialect_name)])
 
-print('dialect name is {}'.format(dialect_name))
 
 
 cc_library(
@@ -24,6 +24,7 @@ cc_library(
     hdrs = glob(["include/*.h"]),
     deps = [
         ":{}".format(dialect_name),
+        ":{}".format(types_name),
         "@llvm-project//mlir:ComplexDialect",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:TensorDialect",
