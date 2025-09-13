@@ -1,8 +1,2 @@
 build --incompatible_disallow_empty_glob=false
 
-# 针对 Windows
-build:windows --cxxopt=/std:c++20
-
-# 针对 Linux
-build:linux --cxxopt=-std=c++20
-
