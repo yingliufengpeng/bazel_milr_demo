@@ -183,7 +183,7 @@
   "moduleExtensions": {
     "//:llvm_extension.bzl%llvm": {
       "general": {
-        "bzlTransitiveDigest": "jvXM78/t5Z6myCPJx7j+Z1zjKsJ6Ih1q1pmTsJNl8TE=",
+        "bzlTransitiveDigest": "HVOmEmiY7xdjddd+4WTGMozJYlOxnTJruf5Gv6bBdd0=",
         "usagesDigest": "sP09Zxe00Bvoju+LvjsuYM8ja3flkR1NLteZRoZlfMc=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -192,7 +192,7 @@
           "llvm-project": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:local.bzl%new_local_repository",
             "attributes": {
-              "path": "/home/peng/src_repo/llvm_src/cd708029e0b2869e80abe31ddb175f7c35361f90",
+              "path": "D:/repo/llvm_repo/cd708029e0b2869e80abe31ddb175f7c35361f90",
               "build_file_content": "# empty"
             }
           },
