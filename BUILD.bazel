@@ -1,9 +1,9 @@
+load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
+load(":gentbl_cc_lib.bzl", "gentbl_cc_lib", "gentbl_pass_cc_lib")
+
 package(
     default_visibility = ["//visibility:public"],
 )
-
-load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
-load(":gentbl_cc_lib.bzl", "gentbl_cc_lib", "gentbl_pass_cc_lib")
 
 td_library(
     name = "td_files",
@@ -136,9 +136,14 @@ cc_library(
     srcs = glob(["src/**/*.cpp"]),
     hdrs = glob(["include/**/*.h"]),
     copts = select({
-        "@platforms//os:windows": ["/std:c++20"],
+        "@platforms//os:windows": [
+            "/std:c++20",
+            "/DWIN32_LEAN_AND_MEAN",
+            "/DNOMINMAX",
+        ],
         "//conditions:default": ["-std=c++20"],
     }),
+    defines = ["LLVM_ENABLE_JITLINK=OFF"],
     deps = [
         ":{}".format(dialect_name),
         ":{}".format(types_name),
@@ -151,53 +156,26 @@ cc_library(
         ":{}".format(fusion_interface_name),
         ":utils",
         "@llvm-project//mlir:AffineDialect",
+        "@llvm-project//mlir:AllExtensions",
+        "@llvm-project//mlir:AllPassesAndDialects",
+        "@llvm-project//mlir:BufferizationDialect",
         "@llvm-project//mlir:ComplexDialect",
+        "@llvm-project//mlir:ControlFlowInterfaces",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:FuncDialect",
-        "@llvm-project//mlir:IR",
         "@llvm-project//mlir:FunctionInterfaces",
-        "@llvm-project//mlir:ControlFlowInterfaces",
+        "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferIntRangeInterface",
         "@llvm-project//mlir:InferTypeOpInterface",
         "@llvm-project//mlir:LinalgDialect",
-        "@llvm-project//mlir:BufferizationDialect",
-        #        "@llvm-project//mlir:EmitCDialect",
-        #        "@llvm-project//mlir:IndexDialect",
-        #        "@llvm-project//mlir:IRDLDialect",
-        #        "@llvm-project//mlir:MLProgramDialect",
-        #        "@llvm-project//mlir:MPIDialect",
-        #        "@llvm-project//mlir:NVGPUDialect",
-        #        "@llvm-project//mlir:NVVMDialect",
-        #        "@llvm-project//mlir:OpenMPDialect",
-        #        "@llvm-project//mlir:PolynomialDialect",
-        #        "@llvm-project//mlir:PtrDialect",
-        #        "@llvm-project//mlir:ROCDLDialect",
-        #        "@llvm-project//mlir:ShapeDialect",
-        #        "@llvm-project//mlir:SPIRVDialect",
-        #        "@llvm-project//mlir:TosaDialect",
-        #        "@llvm-project//mlir:TransformDialect",
-        #        "@llvm-project//mlir:X86VectorDialect",
-        #        "@llvm-project//mlir:XeGPUDialect",
-        #        "@llvm-project//mlir:ArmNeonDialect",
-        #        "@llvm-project//mlir:ArmSMEDialect",
-        #        "@llvm-project//mlir:ArmSVEDialect",
-        #        "@llvm-project//mlir:AsyncDialect",
-        #        "@llvm-project//mlir:GPUTransforms",
-        "@llvm-project//mlir:AllPassesAndDialects",
-        "@llvm-project//mlir:AllExtensions",
         "@llvm-project//mlir:MlirOptLib",
+        "@llvm-project//mlir:OpenACCDialect",
         "@llvm-project//mlir:Pass",
         "@llvm-project//mlir:SCFDialect",
-        "@llvm-project//mlir:OpenACCDialect",
         "@llvm-project//mlir:Support",
         "@llvm-project//mlir:TensorDialect",
         "@llvm-project//mlir:Transforms",
-     ],
-
-
-#    defines = ["LLVM_ENABLE_PROJECTS=mlir"]
-
-
+    ],
 )
 
 cc_binary(
@@ -212,15 +190,14 @@ cc_binary(
     ],
 )
 
-
 cc_binary(
     name = "peng-opt",
     srcs = ["Tools/Peng-opt/Peng-opt.cpp"],
-    data = ['//test:softmax.mlir'],
     copts = select({
         "@platforms//os:windows": ["/std:c++20"],
         "//conditions:default": ["-std=c++20"],
     }),
+    data = ["//test:softmax.mlir"],
     deps = [
         ":lib",
         "@bazel_tools//tools/cpp/runfiles",
