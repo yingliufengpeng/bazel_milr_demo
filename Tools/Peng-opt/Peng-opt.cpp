@@ -67,15 +67,19 @@ int main(int argc, char **argv) {
      auto file_name = process_argv(argv);
 
 
-    char* new_argv[3] = {
+    char* new_argv[2] = {
             argv[0],
             (char*)file_name.c_str(),
-            nullptr,
+
 
     };
 
+    std::cout << "argv[0]  = " << argv[0] << std::endl;
+    std::cout << "argv[1]  = " << argv[1] << std::endl;
     std::cout << "new_argv[1]  = " << new_argv[1] << std::endl;
-
+    std::cout << "new_argv[1]  = " << new_argv[1] << std::endl;
+    // assert(argv[0] == new_argv[0]);
+    // assert(argv[1] == new_argv[1]);
     mlir::registerAllPasses();
     mlir::DialectRegistry registry;
     registerAllDialects(registry);
@@ -83,6 +87,14 @@ int main(int argc, char **argv) {
     registerAllExtensions(registry);
     mlir::peng::registerPengDialectOptPasses();
     // mlirEnableGlobalDebug(true);
-    return mlir::asMainReturnCode(
-            mlir::MlirOptMain(argc, new_argv, "Peng modular optimizer driver\n", registry));
+
+#if defined(_MSC_VER)
+
+    auto m = mlir::MlirOptMain(argc, new_argv, "Peng modular optimizer driver\n", registry);
+
+#else
+    auto m = mlir::MlirOptMain(argc, argv, "Peng modular optimizer driver\n", registry);
+
+#endif
+    return mlir::asMainReturnCode(m);
 }
