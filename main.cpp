@@ -14,10 +14,13 @@
 #include "include/PengAttrs.h"
 #include "include/PengEnums.h"
 #include "include/PengAttrs.h"
+#include "include/Transforms/Passes.h"
 #include "include/PengOps.h"
 #include "include/DistributeParallelismInterfaces.h"
 #include "include/Utils/File.h"
-
+#include "mlir/IR/Visitors.h"
+#include "mlir/Pass/PassManager.h"
+#include "mlir/Support/LLVM.h"
 namespace {
     static const char *const KEntryPoint = "main";
     static const char *const KDPAttrName = "dp_attr";
@@ -260,4 +263,30 @@ void IR_Struct() {
 
 void CH7() { IR_Struct(); }
 
-int main() { CH7(); }
+
+void CH8() {  // 初始化方言注册器
+    mlir::DialectRegistry registry;
+    // 初始化上下文环境
+    mlir::MLIRContext context(registry);
+    // 加载/注册方言
+    context.getOrLoadDialect<mlir::peng::PengDialect>();
+    context.getOrLoadDialect<mlir::func::FuncDialect>();
+    mlir::OpBuilder builder(&context);
+    auto loc = builder.getUnknownLoc();
+    auto module = getModule(builder);
+    std::cout << "ops = " << module.getOps().empty() << std::endl;
+    mlir::PassManager pm(&context);
+    mlir::peng::MarkDistributeParallelParametersPassOptions
+        mark_distribute_parallel_option{.DPNums = 3, .TPNums = 1};
+    pm.addPass(mlir::peng::createMarkDistributeParallelParametersPass(
+        mark_distribute_parallel_option));
+    pm.addNestedPass<mlir::func::FuncOp>(
+        mlir::peng::createApplyDistributeTransformPass());
+    module->dump();
+    if (pm.run(module).failed()) {
+        llvm::outs() << "run pass error!\n";
+    };
+    llvm::outs() << "after pass:\n";
+    module->dump();
+}
+int main() { CH8(); }

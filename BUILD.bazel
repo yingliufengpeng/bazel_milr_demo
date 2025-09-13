@@ -1,5 +1,5 @@
 load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
-load(":gentbl_cc_lib.bzl", "gentbl_cc_lib")
+load(":gentbl_cc_lib.bzl", "gentbl_cc_lib", "gentbl_pass_cc_lib")
 
 td_library(
     name = "td_files",
@@ -24,6 +24,11 @@ attrs_name = gentbl_cc_lib("gen", "attrdef", "PengAttrs", [
 ops_name = gentbl_cc_lib("gen", "op", "PengOps", [":td_files", ":{}".format(dialect_name)])
 interface_name = gentbl_cc_lib("gen", "op-interface", "DistributeParallelismOpInterfaces", [":td_files", ":{}".format(dialect_name)])
 interface_attr_name = gentbl_cc_lib("gen", "attr-interface", "DistributeParallelismAttrInterfaces", [":td_files", ":{}".format(dialect_name)])
+transform_name = gentbl_pass_cc_lib("gen",   "Passes",
+                                    [
+                                        ":td_files",
+                                        ":{}".format(dialect_name),
+                                        ], ['Transforms'])
 
 
 cc_library(
@@ -55,8 +60,8 @@ cc_library(
 
 cc_library(
     name = "lib",
-    srcs = glob(["src/*.cpp"]),
-    hdrs = glob(["include/*.h"]),
+    srcs = glob(["src/**/*.cpp"]),
+    hdrs = glob(["include/**/*.h"]),
     deps = [
         ":{}".format(dialect_name),
         ":{}".format(types_name),
@@ -65,9 +70,12 @@ cc_library(
         ":{}".format(ops_name),
         ":{}".format(interface_name),
         ":{}".format(interface_attr_name),
+        ":{}".format(transform_name),
         "@llvm-project//mlir:ComplexDialect",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:TensorDialect",
+        "@llvm-project//mlir:Pass",
+        "@llvm-project//mlir:Transforms",
         "@llvm-project//mlir:FuncDialect",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:SCFDialect",
