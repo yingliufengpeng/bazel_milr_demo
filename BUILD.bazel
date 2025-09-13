@@ -152,21 +152,69 @@ cc_library(
         "@llvm-project//mlir:InferIntRangeInterface",
         "@llvm-project//mlir:InferTypeOpInterface",
         "@llvm-project//mlir:LinalgDialect",
+        "@llvm-project//mlir:BufferizationDialect",
+#        "@llvm-project//mlir:EmitCDialect",
+#        "@llvm-project//mlir:IndexDialect",
+#        "@llvm-project//mlir:IRDLDialect",
+#        "@llvm-project//mlir:MLProgramDialect",
+#        "@llvm-project//mlir:MPIDialect",
+#        "@llvm-project//mlir:NVGPUDialect",
+#        "@llvm-project//mlir:NVVMDialect",
+#        "@llvm-project//mlir:OpenMPDialect",
+#        "@llvm-project//mlir:PolynomialDialect",
+#        "@llvm-project//mlir:PtrDialect",
+#        "@llvm-project//mlir:ROCDLDialect",
+#        "@llvm-project//mlir:ShapeDialect",
+#        "@llvm-project//mlir:SPIRVDialect",
+#        "@llvm-project//mlir:TosaDialect",
+#        "@llvm-project//mlir:TransformDialect",
+#        "@llvm-project//mlir:X86VectorDialect",
+#        "@llvm-project//mlir:XeGPUDialect",
+#        "@llvm-project//mlir:ArmNeonDialect",
+#        "@llvm-project//mlir:ArmSMEDialect",
+#        "@llvm-project//mlir:ArmSVEDialect",
+#        "@llvm-project//mlir:AsyncDialect",
+#        "@llvm-project//mlir:GPUTransforms",
+
+        "@llvm-project//mlir:AllPassesAndDialects",
+        "@llvm-project//mlir:AllExtensions",
+        "@llvm-project//mlir:MlirOptLib",
+
+
         "@llvm-project//mlir:Pass",
         "@llvm-project//mlir:SCFDialect",
+        "@llvm-project//mlir:OpenACCDialect",
         "@llvm-project//mlir:Support",
         "@llvm-project//mlir:TensorDialect",
         "@llvm-project//mlir:Transforms",
-    ],
-      copts = select({
-            "@platforms//os:windows": ["/std:c++20"],
-            "//conditions:default": ["-std=c++20"],
-        }),
+     ],
+    copts = select({
+        "@platforms//os:windows": ["/std:c++20"],
+        "//conditions:default": ["-std=c++20" ],
+    }),
+
+#    defines = ["LLVM_ENABLE_PROJECTS=mlir"]
+
+
 )
 
 cc_binary(
     name = "main",
     srcs = ["main.cpp"],
+    copts = select({
+        "@platforms//os:windows": ["/std:c++20"],
+        "//conditions:default": ["-std=c++20"],
+    }),
+    deps = [
+        ":lib",
+    ],
+)
+
+
+cc_binary(
+    name = "main2",
+    srcs = ["Tools/Peng-opt/Peng-opt.cpp"],
+    data = ['test/softmax.mlir'],
     copts = select({
         "@platforms//os:windows": ["/std:c++20"],
         "//conditions:default": ["-std=c++20"],

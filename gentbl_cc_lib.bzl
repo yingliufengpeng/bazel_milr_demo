@@ -37,7 +37,7 @@ def gentbl_pass_cc_lib(name, file_name, depends, prefix=None):
         name = gentbl_cc_name,
         tbl_outs = [
             (
-                ["-gen-pass-decls",],
+                ["-gen-pass-decls",  "-name=PengDialectOpt",],
                 "{}{}.h.inc".format(base_dir, file_name),
             ),
 
