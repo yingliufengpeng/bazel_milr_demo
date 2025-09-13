@@ -4,8 +4,15 @@ include "mlir/IR/BuiltinAttributes.td"
 include "mlir/IR/OpBase.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/IR/SymbolInterfaces.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/Interfaces/FunctionInterfaces.td"
+include "mlir/Interfaces/CallInterfaces.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
 
 include "PengDialect.td"
+include "FusionRegionInterfaces.td"
+
 include "PengConstraints.td"
 include "DistributeParallelismAttrInterfaces.td"
 include "DistributeParallelismOpInterfaces.td"
@@ -19,7 +26,7 @@ class Peng_Op<string mnemonic, list<Trait> traits = []>
 }
 
 
-class Peng_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+class Peng_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [Pure], dag attributes = (ins)>:
     Peng_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits#[]>{
     let arguments = !con((ins
         OperandType:$input),
@@ -31,7 +38,7 @@ class Peng_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandTy
 }
 
 
-class Peng_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+class Peng_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [Pure], dag attributes = (ins)>:
     Peng_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits#[]>{
     let arguments = !con((ins
         OperandType:$lhs,
@@ -66,7 +73,7 @@ class Peng_ElewiseBinaryOp<string mnemonic,Type OperandType, Type resultType = O
 
 
 
-def Peng_ConstOp : Peng_Op<"const",[]>{
+def Peng_ConstOp : Peng_Op<"const",[Pure]>{
     let arguments = (ins
         ElementsAttr:$value);
     let results = (outs
@@ -90,7 +97,7 @@ def Peng_MulOp : Peng_ElewiseBinaryOp<"mul",AnyPTensor>;
 def Peng_DivOp : Peng_ElewiseBinaryOp<"div",AnyPTensor>;
 
 
-def Peng_BufferCastOp : Peng_Op<"buffer_cast",[]>{
+def Peng_BufferCastOp : Peng_Op<"buffer_cast",[Pure]>{
     let description = "对数据切分的标记";
     let arguments = (ins
         Variadic<PTensorOrBuffer>:$inputs,
@@ -102,7 +109,7 @@ def Peng_BufferCastOp : Peng_Op<"buffer_cast",[]>{
 }
 
 
-def Peng_BufferOp : Peng_Op<"buffer",[]>{
+def Peng_BufferOp : Peng_Op<"buffer",[Pure]>{
     let description = "将 多个device_id 的tensor 组合成 一个 buffer";
     let arguments = (ins
         Variadic<AnyPTensor>:$tensors
@@ -126,7 +133,7 @@ def Peng_BufferOp : Peng_Op<"buffer",[]>{
 }
 
 
-def Peng_GetTensorOp: Peng_Op<"get_tensor",[]>{
+def Peng_GetTensorOp: Peng_Op<"get_tensor",[Pure]>{
     let description = "从buffer中取出指定device_id的tensor";
     let arguments = (ins
         AnyBuffer:$buffer,
@@ -137,7 +144,7 @@ def Peng_GetTensorOp: Peng_Op<"get_tensor",[]>{
     let hasVerifier = 1;
 }
 
-def Peng_SoftmaxOp : Peng_UnaryOp<"softmax",AnyPTensor, AnyPTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>], (ins I64Attr:$axis)>{
+def Peng_SoftmaxOp : Peng_UnaryOp<"softmax",AnyPTensor, AnyPTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>, Pure], (ins I64Attr:$axis)>{
     let hasVerifier = 1;
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input, "int64_t":$axis) ,
@@ -162,6 +169,35 @@ def Peng_PrintOp: Peng_Op<"print",[]>{
     let arguments = (ins
         AnyType:$input
     );
+}
+
+def Peng_DeviceKernelOp: Peng_Op<"device_region",[
+        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]>{
+    let arguments = (ins
+        SymbolNameAttr:$sym_name,
+        I64Attr:$device_id,
+        Variadic<AnyType>:$args
+    );
+
+    let regions = (region SizedRegion<1>:$region);
+
+    let results = (outs
+        Variadic<AnyType>:$result);
+
+    let hasVerifier = 1;
+}
+
+def Peng_ReturnOp : Peng_Op<"return", [Pure, HasParent<"DeviceKernelOp">, ReturnLike, Terminator]> {
+  let summary = "return operation";
+
+  let arguments = (ins Variadic<AnyType>:$operands);
+
+  let builders = [OpBuilder<(ins), [{
+    build($_builder, $_state, std::nullopt);
+  }]>];
+
+  let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
+  let hasVerifier = 0;
 }
 
 #endif // DIALECT_PENG_OPS_TD

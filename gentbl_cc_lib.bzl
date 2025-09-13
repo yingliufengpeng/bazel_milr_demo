@@ -6,7 +6,7 @@ def gentbl_cc_lib(name, type1, file_name, depends, prefix=None):
     base_dir = ''
     for e in prefix:
         base_dir += '{}/'.format(e)
-    gentbl_cc_name = '{}_{}'.format(name, type1)
+    gentbl_cc_name = '{}_{}_{}'.format(name, type1, file_name)
     gentbl_cc_library(
         name = gentbl_cc_name,
         tbl_outs = [

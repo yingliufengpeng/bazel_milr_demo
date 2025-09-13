@@ -18,12 +18,12 @@
 #include "include/PengOps.h"
 #include "include/DistributeParallelismInterfaces.h"
 #include "include/Utils/File.h"
+#include "include/Utils/Key.h"
 #include "mlir/IR/Visitors.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/LLVM.h"
 namespace {
-    static const char *const KEntryPoint = "main";
-    static const char *const KDPAttrName = "dp_attr";
+
 } // namespace
 void CH2() {
     mlir::DialectRegistry DialectRegistry;
@@ -138,20 +138,21 @@ void CH3() {
     llvm::outs() << "print_op  " << print_op << "\n";
 }
 
-mlir::ModuleOp getModule(mlir::OpBuilder &builder) {
+mlir::ModuleOp getModule(mlir::OpBuilder& builder) {
     auto loc = builder.getUnknownLoc();
     auto context = builder.getContext();
     auto module = builder.create<mlir::ModuleOp>(loc, "Peng");
-
     builder.setInsertionPointToStart(module.getBody());
     auto f32 = mlir::Float32Type::get(context);
     auto dy_dim = 128;
     auto dy_shape = mlir::SmallVector<int64_t>({dy_dim, dy_dim, 24});
     auto dy_tensor_type =
-            mlir::peng::PTensorType::get(context, dy_shape, f32, 0);
+        mlir::peng::PTensorType::get(context, dy_shape, f32, 0);
     auto func_type =
-            mlir::FunctionType::get(context, {dy_tensor_type}, {dy_tensor_type});
-    auto func = builder.create<mlir::func::FuncOp>(loc, KEntryPoint, func_type);
+        mlir::FunctionType::get(context, {dy_tensor_type}, {dy_tensor_type});
+    auto func =
+        builder.create<mlir::func::FuncOp>(loc, KEntryPointName, func_type);
+    func->setAttr(KHostFunc, builder.getUnitAttr());
     func->setAttr(KDPAttrName,
                   mlir::peng::DataParallelismAttr::get(context, 2));
 
@@ -289,4 +290,32 @@ void CH8() {  // 初始化方言注册器
     llvm::outs() << "after pass:\n";
     module->dump();
 }
-int main() { CH8(); }
+void CH9() {
+    mlir::DialectRegistry registry;
+    // 初始化上下文环境
+    mlir::MLIRContext context(registry);
+    context.disableMultithreading(true);
+    // 加载/注册方言
+    context.getOrLoadDialect<mlir::peng::PengDialect>();
+    context.getOrLoadDialect<mlir::func::FuncDialect>();
+    mlir::OpBuilder builder(&context);
+    auto loc = builder.getUnknownLoc();
+    auto module = getModule(builder);
+    mlir::PassManager pm(&context);
+    mlir::peng::MarkDistributeParallelParametersPassOptions
+        mark_distribute_parallel_option{.DPNums = 3, .TPNums = 1};
+    pm.addPass(mlir::peng::createMarkDistributeParallelParametersPass(
+        mark_distribute_parallel_option));
+    pm.addNestedPass<mlir::func::FuncOp>(
+        mlir::peng::createApplyDistributeTransformPass());
+    pm.addNestedPass<mlir::func::FuncOp>(
+        mlir::peng::createDeviceRegionFusionPass());
+    module->dump();
+    if (pm.run(module).failed()) {
+        llvm::outs() << "run pass error!\n";
+    };
+    llvm::outs() << "after pass:\n";
+    module->dump();
+}            
+
+int main() { CH9(); }

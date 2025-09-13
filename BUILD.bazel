@@ -10,6 +10,8 @@ td_library(
         "@llvm-project//mlir:InferTypeOpInterfaceTdFiles",
         "@llvm-project//mlir:OpBaseTdFiles",
         "@llvm-project//mlir:SideEffectInterfacesTdFiles",
+        "@llvm-project//mlir:FunctionInterfacesTdFiles",
+        "@llvm-project//mlir:ControlFlowInterfacesTdFiles",
     ],
 )
 
@@ -91,6 +93,16 @@ transform_name = gentbl_pass_cc_lib(
     ["Transforms"],
 )
 
+fusion_interface_name = gentbl_cc_lib(
+    "gen",
+    "op-interface",
+    "FusionRegionInterfaces",
+    [
+        ":td_files",
+        ":{}".format(dialect_name),
+    ],
+)
+
 cc_library(
     name = "utils",
     srcs = glob(["src/Utils/*.cpp"]),
@@ -128,12 +140,15 @@ cc_library(
         ":{}".format(interface_name),
         ":{}".format(interface_attr_name),
         ":{}".format(transform_name),
+        ":{}".format(fusion_interface_name),
         ":utils",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:ComplexDialect",
         "@llvm-project//mlir:Dialect",
         "@llvm-project//mlir:FuncDialect",
         "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:FunctionInterfaces",
+        "@llvm-project//mlir:ControlFlowInterfaces",
         "@llvm-project//mlir:InferIntRangeInterface",
         "@llvm-project//mlir:InferTypeOpInterface",
         "@llvm-project//mlir:LinalgDialect",
@@ -143,6 +158,10 @@ cc_library(
         "@llvm-project//mlir:TensorDialect",
         "@llvm-project//mlir:Transforms",
     ],
+      copts = select({
+            "@platforms//os:windows": ["/std:c++20"],
+            "//conditions:default": ["-std=c++20"],
+        }),
 )
 
 cc_binary(

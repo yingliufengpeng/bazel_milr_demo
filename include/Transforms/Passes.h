@@ -9,6 +9,8 @@
 namespace mlir::peng {
     std::unique_ptr<::mlir::Pass> createApplyDistributeTransformPass();
 
+    void populateDeviceRegionFusionPatterns(RewritePatternSet &patterns);
+    void populateBufferCastOpCanonicalizationPatterns(RewritePatternSet &patterns);
 
 
 #define GEN_PASS_DECL

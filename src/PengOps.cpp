@@ -4,8 +4,21 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/LogicalResult.h"
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/MapVector.h"
+#include "llvm/ADT/PointerIntPair.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/ScopedPrinter.h"
 #include "mlir/IR/Value.h"
 #include <iostream>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
 #include "../include/PengDialect.h"
 #include "../include/PengOps.h"
 
@@ -160,5 +173,129 @@ namespace mlir::peng {
 }
 
     bool SoftmaxOp::supportedDataParallelism() { return getAxis() != 0; }
+
+}
+
+namespace mlir::peng {
+
+    ::llvm::LogicalResult DeviceKernelOp::verify() { return llvm::success(); }
+
+namespace {
+static inline llvm::SmallString<4> getFusionName(
+    mlir::ArrayRef<::mlir::Operation*> ops) {
+  llvm::SmallString<4> name;
+  for (auto op : ops) {
+    name.append(op->getName().stripDialect());
+    name.append("_");
+    for (auto type : op->getOperandTypes()) {
+      if (auto shaped = llvm::dyn_cast_or_null<ShapedType>(type)) {
+        for (auto index : llvm::index_range(0, shaped.getRank())) {
+          if (shaped.isDynamicDim(index)) {
+            name.append("d_");
+          } else {
+            name.append(llvm::to_string(shaped.getDimSize(index)));
+            name.append("_");
+          }
+        }
+      }
+    }
+  }
+  return name;
+}
+
+static inline int getDeviceid(mlir::ArrayRef<::mlir::Operation*> ops) {
+  if (auto tensor = llvm::cast_or_null<peng::PTensorType>(
+          ops.back()->getResultTypes().front())) {
+    return tensor.getDeviceId();
+  }
+  llvm_unreachable("");
+  return -1;
+}
+
+static inline llvm::MapVector<Value, std::pair<Operation*, int>>
+getFusionInputs(mlir::ArrayRef<::mlir::Operation*> ops) {
+  mlir::SetVector<Operation*> op_set(ops.begin(), ops.end());
+  llvm::MapVector<Value, std::pair<Operation*, int>> res;
+  for (auto op : ops) {
+    for (auto [index, operand] : llvm::enumerate(op->getOperands())) {
+      if (isa<BlockArgument>(operand))
+        res[operand] = std::make_pair(nullptr, 0);
+      if (op_set.contains(operand.getDefiningOp())) continue;
+      res[operand] = std::make_pair(op, index);
+    }
+  }
+  return res;
+}
+
+static inline llvm::MapVector<Value, std::pair<Operation*, int>>
+getFusionOutputs(mlir::ArrayRef<::mlir::Operation*> ops) {
+  mlir::SetVector<Operation*> op_set(ops.begin(), ops.end());
+  llvm::MapVector<Value, std::pair<Operation*, int>> outs;
+  for (auto op : ops) {
+    for (auto [index, res] : llvm::enumerate(op->getResults())) {
+      for (auto user : res.getUsers()) {
+        if (op_set.contains(user)) continue;
+        outs[res] = std::make_pair(op, index);
+        break;
+      }
+    }
+  }
+  return outs;
+}
+}  // namespace
+llvm::LogicalResult DeviceKernelOp::FusionOps(::mlir::RewriterBase& rewriter,
+                               mlir::ArrayRef<::mlir::Operation*> ops,
+                               ::mlir::Location loc) {
+  if (ops.size() == 0) return llvm::failure();
+  auto name = getFusionName(ops);
+  auto device_id = getDeviceid(ops);
+  Block block;
+
+  auto inputs_map = getFusionInputs(ops);
+  auto outputs_map = getFusionOutputs(ops);
+  llvm::SmallVector<Value> inputs_val;
+  llvm::SmallVector<Value> output_val;
+  llvm::SmallVector<Type> outputs_type;
+  for (auto [key, val] : inputs_map) {
+    inputs_val.push_back(key);
+  }
+  for (auto [key, val] : outputs_map) {
+    outputs_type.push_back(key.getType());
+  }
+  auto kernel = rewriter.create<DeviceKernelOp>(loc, outputs_type, name,
+                                                device_id, inputs_val);
+  kernel->getRegion(0).push_back(&block);
+  std::map<Operation*, Operation*> op_map;
+  for (auto op : ops) {
+    auto clone_op = op->clone();
+    block.push_back(clone_op);
+    op_map[op] = clone_op;
+    for (auto [index, operand] : llvm::enumerate(op->getOperands())) {
+      if (isa<BlockArgument>(operand)) continue;
+      if (op_map.contains(operand.getDefiningOp())) {
+        op_map[op]->setOperand(
+            index,
+            op_map[operand.getDefiningOp()]->getResult(
+                llvm::cast_or_null<OpResult>(operand).getResultNumber()));
+      }
+    }
+  }
+  for (auto [key, val] : outputs_map) {
+    output_val.push_back(op_map[val.first]->getResult(val.second));
+  }
+  for (auto [index, key] : llvm::enumerate(inputs_map)) {
+    auto arg = block.addArgument(key.first.getType(), loc);
+    op_map[key.second.first]->setOperand(key.second.second, arg);
+  }
+  auto insert_point = rewriter.saveInsertionPoint();
+  rewriter.setInsertionPointToEnd(&block);
+  rewriter.create<ReturnOp>(loc, output_val);
+  rewriter.setInsertionPoint(insert_point.getBlock(), insert_point.getPoint());
+  for (auto [index, key] : llvm::enumerate(outputs_map)) {
+    rewriter.replaceAllUsesWith(key.first, kernel->getResult(index));
+  }
+  kernel->getParentOp()->dump();;
+  return llvm::success();
+}
 
 }
