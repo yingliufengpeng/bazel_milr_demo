@@ -46,18 +46,11 @@ python.toolchain(
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
-
-    hub_name = "pip_deps2",
-    #    overrides = {
-    #        "fastapi": {
-    #            "build_file": "//third_party:fastapi.BUILD",
-    #        },
-    #    },
-    python_version = PYTHON_VERSION,
-    requirements_lock = "//:requirements_lock_3_12.txt",
+    hub_name = "pip",
+    python_version = "3.12",
+    requirements_lock = "//:requirements.txt",
 )
-use_repo(pip, "pip_deps2")
-
+use_repo(pip, "pip")
 bazel_dep(name = "glog", version = "0.5.0", repo_name = "com_github_google_glog")
 
 

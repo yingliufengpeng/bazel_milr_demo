@@ -1,0 +1,25 @@
+package(
+    default_visibility = ["//visibility:public"],
+)
+load("//:lit.bzl", "glob_lit_tests")
+exports_files(["softmax.mlir"])
+# Bundle together all of the test utilities that are used by tests.
+filegroup(
+    name = "test_utilities",
+    testonly = True,
+    data = [
+        "//test:lit.cfg.py",
+        "//:peng-opt",
+#        "@llvm-project//clang:clang",
+        "@llvm-project//llvm:FileCheck",
+        "@llvm-project//llvm:count",
+#        "@llvm-project//llvm:llc",
+        "@llvm-project//llvm:not",
+        "@llvm-project//mlir:mlir-cpu-runner",
+        "@llvm-project//mlir:mlir-opt",
+        "@llvm-project//mlir:mlir-translate",
+        "@pip//lit",
+    ],
+)
+
+glob_lit_tests()
