@@ -50,7 +50,7 @@ def lit_test(name = None, src = None, size = "small", tags = None):
         size = size,
         # -v ensures lit outputs useful info during test failures
         args = ["-v", paths.join(native.package_name(), src)],
-        data = ["//test:test_utilities", filegroup_name],
+        data = ["//tests:test_utilities", filegroup_name],
         deps = ["@pip//lit"],
         srcs = ["@llvm-project//llvm:lit"],
         main = "lit.py",

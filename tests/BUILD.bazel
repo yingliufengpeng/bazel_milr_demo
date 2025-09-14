@@ -12,7 +12,7 @@ filegroup(
     testonly = True,
     data = [
         "//:peng-opt",
-        "//test:lit.cfg.py",
+        "//tests:lit.cfg.py",
         #        "@llvm-project//clang:clang",
         "@llvm-project//llvm:FileCheck",
         "@llvm-project//llvm:count",
