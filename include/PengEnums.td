@@ -4,6 +4,7 @@
 
 include "mlir/IR/EnumAttr.td"
 include "PengTypes.td"
+include "PengDialect.td"
 
 
 def Peng_LAYOUT_LEFT        : I32EnumAttrCase<"LEFT", 0>;
@@ -18,7 +19,6 @@ def Peng_Layout : I32EnumAttr<"Layout",
   let genSpecializedAttr = 0;
   let cppNamespace = "::mlir::peng";
 }
-
 
 
 #endif //DIALECT_PENG_EUNMS_TD

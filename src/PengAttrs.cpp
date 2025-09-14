@@ -27,7 +27,7 @@ namespace mlir::peng {
             >();
     }
 
-    bool LayoutAttr::isLeft() {
-        return true;
+    bool LayoutAttr::isChannelLast() {
+        return getValue() == Layout::NHWC;
     }
 }
