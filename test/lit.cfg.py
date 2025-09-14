@@ -47,3 +47,10 @@ substitutions = {
     "%project_source_dir": str(runfiles_dir.joinpath(Path('_main'))),
 }
 config.substitutions.extend(substitutions.items())
+
+
+print(f'ooooooooooo os.environ {os.environ}')
+print(f'ooooooooooo2')
+# print(f'ooooooooooo runfiles_dir {runfiles_dir}')
+# print(f'ooooooooooo2 config.substitutions {config.substitutions}')
+# print(f'ooooooooooo3 config env PATH {config.environment["PATH"]}')
