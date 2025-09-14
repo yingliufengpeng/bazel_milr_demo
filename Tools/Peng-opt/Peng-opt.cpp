@@ -4,6 +4,7 @@
 #include "include/PengDialect.h"
 #include "include/Transforms/Passes.h"
 #include "include/Conversion/Passes.h"
+#include "include/Pipelines/Pipelines.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
@@ -88,6 +89,7 @@ int main(int argc, char **argv) {
     registerAllExtensions(registry);
     mlir::peng::registerPengDialectOptPasses();
     mlir::peng::registerPengDialectConversionPasses();
+    mlir::pipeline::registerPengBasicPipelines();
     // mlirEnableGlobalDebug(true);
 
 #if defined(_MSC_VER)
