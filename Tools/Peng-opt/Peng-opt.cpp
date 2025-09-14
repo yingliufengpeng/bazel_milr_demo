@@ -3,6 +3,7 @@
 
 #include "include/PengDialect.h"
 #include "include/Transforms/Passes.h"
+#include "include/Conversion/Passes.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
@@ -86,6 +87,7 @@ int main(int argc, char **argv) {
     registry.insert<mlir::peng::PengDialect>();
     registerAllExtensions(registry);
     mlir::peng::registerPengDialectOptPasses();
+    mlir::peng::registerPengDialectConversionPasses();
     // mlirEnableGlobalDebug(true);
 
 #if defined(_MSC_VER)

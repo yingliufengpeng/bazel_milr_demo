@@ -27,7 +27,7 @@ def gentbl_cc_lib(name, type1, file_name, depends, prefix=None):
     return gentbl_cc_name
 
 
-def gentbl_pass_cc_lib(name, file_name, depends, prefix=None):
+def gentbl_pass_cc_lib(name, file_name, depends, reg_name,  prefix=None):
     prefix = prefix or []
     base_dir = ''
     for e in prefix:
@@ -37,7 +37,7 @@ def gentbl_pass_cc_lib(name, file_name, depends, prefix=None):
         name = gentbl_cc_name,
         tbl_outs = [
             (
-                ["-gen-pass-decls",  "-name=PengDialectOpt",],
+                ["-gen-pass-decls",  "-name={}".format(reg_name),],
                 "{}{}.h.inc".format(base_dir, file_name),
             ),
 

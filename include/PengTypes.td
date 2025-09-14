@@ -15,7 +15,7 @@ class Peng_Type<string name, string typeMnemonic, list<Trait> traits = [],
 }
 
 
-def NorthStar_TensorType : Peng_Type<"PTensor","p_tensor",[ShapedTypeInterface],"::mlir::TensorType">{
+def Peng_TensorType : Peng_Type<"PTensor","p_tensor",[ShapedTypeInterface],"::mlir::TensorType">{
   // 概述
   let summary = " the summary of peng tensor type";
 

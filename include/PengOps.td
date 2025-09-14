@@ -172,7 +172,7 @@ def Peng_PrintOp: Peng_Op<"print",[]>{
 }
 
 def Peng_DeviceKernelOp: Peng_Op<"device_region",[
-        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]>{
+        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]# GraphRegionNoTerminator.traits>{
     let arguments = (ins
         SymbolNameAttr:$sym_name,
         I64Attr:$device_id,
