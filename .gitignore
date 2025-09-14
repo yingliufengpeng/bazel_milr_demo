@@ -2,4 +2,4 @@
 bazel-testlogs/
 bazel-bin/
 bazel-out/
-
+bazel-bazel_mlir_demo/
