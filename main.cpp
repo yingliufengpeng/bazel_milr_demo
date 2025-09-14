@@ -166,6 +166,157 @@ mlir::ModuleOp getModule(mlir::OpBuilder& builder) {
     return module;
 }
 
+void attributeBrief() {
+    auto context = new mlir::MLIRContext;
+    context->getOrLoadDialect<mlir::peng::PengDialect>();
+
+    // Float Attr  表示浮点数的Attribute
+    auto f32_attr = mlir::FloatAttr::get(mlir::Float32Type::get(context), 2);
+    llvm::outs() << "F32 Attribute :\t";
+    f32_attr.dump();
+
+    // Integer Attr  表示整数的Attribute
+    auto i32_attr =
+        mlir::IntegerAttr::get(mlir::IntegerType::get(context, 32), 10);
+    llvm::outs() << "I32 Attribute :\t";
+    i32_attr.dump();
+
+    // StrideLayout Attr  表示内存布局信息的Attribute
+    auto stride_layout_attr = mlir::StridedLayoutAttr::get(context, 1, {6, 3, 1});
+    llvm::outs() << "StrideLayout Attribute :\t";
+    stride_layout_attr.dump();
+
+    // String Attr    表示字符串的Attribute
+    auto str_attr = mlir::StringAttr::get(context, "Hello, MLIR!");
+    llvm::outs() << "String Attribute :\t";
+    str_attr.dump();
+
+    // StrRef Attr   表示符号的Attribute
+    auto str_ref_attr = mlir::SymbolRefAttr::get(str_attr);
+    llvm::outs() << "SymbolRef Attribute :\t";
+    str_ref_attr.dump();
+
+    // Type Attr    储存Type 的Attribute
+    auto type_attr = mlir::TypeAttr::get(mlir::peng::PTensorType::get(
+        context, {1, 2, 3}, mlir::Float32Type::get(context)));
+    llvm::outs() << "Type Attribute :\t";
+    type_attr.dump();
+
+    // Unit Attr   一般作为标记使用
+    auto unit_attr = mlir::UnitAttr::get(context);
+    llvm::outs() << "Unit Attribute :\t";
+    unit_attr.dump();
+
+    auto i64_arr_attr = mlir::DenseI64ArrayAttr::get(context, {1, 2, 3});
+    llvm::outs() << "Array Attribute :\t";
+    i64_arr_attr.dump();
+
+    auto dense_attr = mlir::DenseElementsAttr::get(
+        mlir::RankedTensorType::get({2, 2}, mlir::Float32Type::get(context)),
+        llvm::ArrayRef<float>{1, 2, 3, 4});
+    llvm::outs() << "Dense Attribute :\t";
+    dense_attr.dump();
+    delete context;
+}
+
+
+void CH4() {
+  attributeBrief();
+  // 初始化方言注册器
+  mlir::DialectRegistry registry;
+  // 初始化上下文环境
+  mlir::MLIRContext context(registry);
+  // 加载/注册方言
+  auto dialect = context.getOrLoadDialect<mlir::peng::PengDialect>();
+  // Layout Eunms
+  auto nchw = mlir::peng::Layout::NCHW;
+  llvm::outs() << "NCHW: " << mlir::peng::stringifyEnum(nchw) << "\n";
+  // LayoutAttr
+  auto nchw_attr = mlir::peng::LayoutAttr::get(&context, nchw);
+  llvm::outs() << "NCHW LayoutAttribute :\t";
+  nchw_attr.dump();
+  // DataParallelismAttr
+  auto dp_attr = mlir::peng::DataParallelismAttr::get(&context, 2);
+  llvm::outs() << "DataParallelism Attribute :\t";
+  dp_attr.dump();
+}
+
+void CH5() {
+  // 初始化方言注册器
+  mlir::DialectRegistry registry;
+  // 初始化上下文环境
+  mlir::MLIRContext context(registry);
+  // 加载/注册方言
+  context.getOrLoadDialect<mlir::peng::PengDialect>();
+
+  mlir::OpBuilder builder(&context);
+  auto loc = builder.getUnknownLoc();
+
+  // ModuleOp
+  auto module = builder.create<mlir::ModuleOp>(loc, "NorthStar");
+  builder.setInsertionPointToStart(module.getBody());
+  // ConstOp
+  auto f32 = mlir::Float32Type::get(&context);
+  auto shape = mlir::SmallVector<int64_t>({2, 2});
+  auto const_value_1 =
+      mlir::SmallVector<llvm::APFloat>(4, llvm::APFloat((float)1));
+  auto const_value_2 =
+      mlir::SmallVector<llvm::APFloat>(4, llvm::APFloat((float)2));
+  auto tensor_type_1 =
+      mlir::peng::PTensorType::get(&context, shape, f32, 0);
+  auto tensor_type_2 =
+      mlir::peng::PTensorType::get(&context, shape, f32, 1);
+  auto const_1 = builder.create<mlir::peng::ConstOp>(
+      loc, tensor_type_1,
+      mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                   const_value_1));
+  auto const_2 = builder.create<mlir::peng::ConstOp>(
+      loc, tensor_type_1,
+      mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                   const_value_1));
+  auto const_3 = builder.create<mlir::peng::ConstOp>(
+      loc, tensor_type_2,
+      mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                   const_value_2));
+  auto const_4 = builder.create<mlir::peng::ConstOp>(
+      loc, tensor_type_2,
+      mlir::DenseElementsAttr::get(mlir::RankedTensorType::get(shape, f32),
+                                   const_value_2));
+  llvm::outs() << "Const tensor in divece 0 :\n";
+  const_1->dump();
+  llvm::outs() << "Const tensor in divece 1 :\n";
+  const_3->dump();
+  // Buffer Op
+  auto buffer_op = builder.create<mlir::peng::BufferOp>(
+      loc, mlir::ValueRange({const_1, const_3}));
+  llvm::outs() << "Buffer Op :\n";
+  buffer_op->dump();
+  // Get Tensor Op
+  auto get_tensor_op_1 = builder.create<mlir::peng::GetTensorOp>(
+      loc, tensor_type_1, buffer_op, 0);
+  auto get_tensor_op_2 = builder.create<mlir::peng::GetTensorOp>(
+      loc, tensor_type_2, buffer_op, 1);
+  llvm::outs() << "Get Tensor Op :\n";
+  get_tensor_op_1->dump();
+  get_tensor_op_2->dump();
+  // Softmax Op
+  auto softmax_op =
+      builder.create<mlir::peng::SoftmaxOp>(loc, get_tensor_op_1, 1);
+  llvm::outs() << "Softmax Op :\n";
+  softmax_op->dump();
+  // Exp Op
+  auto exp_op = builder.create<mlir::peng::ExpOp>(loc, get_tensor_op_2);
+  llvm::outs() << "Exp Op :\n";
+  exp_op->dump();
+  // all to all op
+  auto out_buffer_op = builder.create<mlir::peng::BufferOp>(
+      loc, mlir::ValueRange({const_2, const_4}));
+  auto all_to_all_op = builder.create<mlir::peng::AllToAllOp>(
+      loc, buffer_op, out_buffer_op);
+  llvm::outs() << "All to All Op :\n";
+  all_to_all_op->dump();
+}
+
 void CH6() {
     // 初始化方言注册器
     mlir::DialectRegistry registry;
@@ -317,6 +468,33 @@ void CH9() {
     llvm::outs() << "after pass:\n";
     module->dump();
 }            
+void CH11() {
+    mlir::DialectRegistry registry;
+    // 初始化上下文环境
+    mlir::MLIRContext context(registry);
+    context.disableMultithreading(true);
+    // 加载/注册方言
+    context.getOrLoadDialect<mlir::peng::PengDialect>();
+    context.getOrLoadDialect<mlir::func::FuncDialect>();
+    mlir::OpBuilder builder(&context);
+    auto loc = builder.getUnknownLoc();
+    auto module = getModule(builder);
+    mlir::PassManager pm(&context);
+    mlir::peng::MarkDistributeParallelParametersPassOptions
+        mark_distribute_parallel_option{.DPNums = 3, .TPNums = 1};
+    pm.addPass(mlir::peng::createMarkDistributeParallelParametersPass(
+        mark_distribute_parallel_option));
+    auto func_pm = pm.nest<mlir::func::FuncOp>();
+    func_pm.addPass(mlir::peng::createApplyDistributeTransformPass());
+    pm.addNestedPass<mlir::func::FuncOp>(
+        mlir::peng::createDeviceRegionFusionPass());
+    module->dump();
+    if (pm.run(module).failed()) {
+        llvm::outs() << "run pass error!\n";
+    };
+    llvm::outs() << "after pass:\n";
+    module->dump();
+}
 
 void CH14() {
   mlir::DialectRegistry registry;
@@ -343,4 +521,4 @@ void CH14() {
 // 2. 常量折叠：    let hasFolder = 1;                // Op 生成 fold 函数
 //                 let hasConstantMaterializer = 1;  // Dialect 生成的Const
 //                 Operation 的函数
-int main() { CH14(); }
+int main() { CH11(); }
