@@ -60,7 +60,6 @@ std::string process_argv(char **argv) {
 int main(int argc, char **argv) {
 
     std::cout << "当前工作路径: " << std::filesystem::current_path() << std::endl;
-    std::cout << "argv is  " << argv << std::endl;
 
     if (argc < 2) {
         std::cout << "参数传递错误  need file_name" << std::endl;
