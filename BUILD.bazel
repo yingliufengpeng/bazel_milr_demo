@@ -214,5 +214,6 @@ cc_binary(
     deps = [
         ":lib",
         "@bazel_tools//tools/cpp/runfiles",
+         "@llvm-project//mlir:CAPIDebug",
     ],
 )

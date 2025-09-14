@@ -20,7 +20,7 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/FileUtilities.h"
-
+#include "mlir-c/Debug.h"
 #include <iostream>
 #include <filesystem>
 #include <tuple>
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     mlir::peng::registerPengDialectOptPasses();
     mlir::peng::registerPengDialectConversionPasses();
     mlir::pipeline::registerPengBasicPipelines();
-    // mlirEnableGlobalDebug(true);
+    mlirEnableGlobalDebug(true);
 
 #if defined(_MSC_VER)
 
