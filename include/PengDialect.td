@@ -21,6 +21,9 @@ def Peng_Dialect : Dialect {
       void registerOps();
     }];
 
+      // 规范化的声明. [14]
+      let hasConstantMaterializer = 1;
+
     // 使用MLIR默认的类型解析输出.
     let useDefaultTypePrinterParser  = 1;
 

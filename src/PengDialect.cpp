@@ -5,6 +5,7 @@
 
 
 #include "../include/PengDialect.h"
+#include "../include/PengOps.h"
 
 #include "PengDialect.cpp.inc"
 
@@ -21,5 +22,16 @@ namespace mlir::peng {
 
     void PengDialect::sayHello() {
         llvm::outs() << "say hello" << " \n";
+    }
+
+    ::mlir::Operation *PengDialect::materializeConstant(
+    ::mlir::OpBuilder &builder, ::mlir::Attribute value, ::mlir::Type type,
+    ::mlir::Location loc) {
+        llvm::outs() << __func__ << "\n";
+        if (isa<::mlir::ElementsAttr>(value)) {
+            return builder.create<mlir::peng::ConstOp>(loc, type,
+                                           llvm::cast<::mlir::ElementsAttr>(value));
+        }
+        return nullptr;
     }
 }

@@ -73,11 +73,12 @@ class Peng_ElewiseBinaryOp<string mnemonic,Type OperandType, Type resultType = O
 
 
 
-def Peng_ConstOp : Peng_Op<"const",[Pure]>{
+def Peng_ConstOp : Peng_Op<"const",[Pure, ConstantLike]>{
     let arguments = (ins
         ElementsAttr:$value);
     let results = (outs
         AnyPTensor:$result);
+    let hasFolder = 1;
 }
 
 def Peng_ExpOp : Peng_ElewiseUnaryOp<"exp",AnyPTensor>{
@@ -91,7 +92,9 @@ def Peng_ExpOp : Peng_ElewiseUnaryOp<"exp",AnyPTensor>{
 }
 
 
-def Peng_AddOp : Peng_ElewiseBinaryOp<"add",AnyPTensor>;
+def Peng_AddOp : Peng_ElewiseBinaryOp<"add",AnyPTensor> {
+    let hasFolder = 1;
+}
 def Peng_SubOp : Peng_ElewiseBinaryOp<"sub",AnyPTensor>;
 def Peng_MulOp : Peng_ElewiseBinaryOp<"mul",AnyPTensor>;
 def Peng_DivOp : Peng_ElewiseBinaryOp<"div",AnyPTensor>;
@@ -106,6 +109,9 @@ def Peng_BufferCastOp : Peng_Op<"buffer_cast",[Pure]>{
     let results = (outs
         Variadic<PTensorOrBuffer>:$outputs);
     let hasVerifier = 1;
+
+     let hasCanonicalizeMethod = 1;
+//    let hasCanonicalizer = 1;
 }
 
 
