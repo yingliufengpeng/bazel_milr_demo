@@ -181,7 +181,7 @@ void CH6() {
     auto tensor_type =
             mlir::peng::PTensorType::get(&context, shape, f32, 0);
     auto shaped_type = mlir::cast<mlir::ShapedType>(tensor_type);
-    llvm::outs() << "NSTensorType: \t";
+    llvm::outs() << "PTensorType: \t";
     tensor_type.dump();
     llvm::outs() << "Shaped Type Interface:\t";
     shaped_type.dump();
@@ -318,4 +318,29 @@ void CH9() {
     module->dump();
 }            
 
-int main() { CH9(); }
+void CH14() {
+  mlir::DialectRegistry registry;
+  // 初始化上下文环境
+  mlir::MLIRContext context(registry);
+  context.disableMultithreading(true);
+  // 加载/注册方言
+  context.getOrLoadDialect<mlir::peng::PengDialect>();
+  context.getOrLoadDialect<mlir::func::FuncDialect>();
+  mlir::OpBuilder builder(&context);
+  auto loc = builder.getUnknownLoc();
+  auto type = mlir::peng::PTensorType::get(&context, {2, 2},
+                                                  builder.getF32Type(), 1);
+  auto const_op = builder.create<mlir::peng::ConstOp>(
+      loc, type, mlir::DenseElementsAttr::get(type, mlir::ArrayRef<float>{1.0, 2., 3., 4.}));
+  const_op->dump();
+}
+
+// 1.规范化定义：   let hasCanonicalizeMethod = 1;    // Op 生成一个重写的函数
+//                 let hasCanonicalizer = 1;         // Op
+//                 生成多个规范化的Pattern的函数
+//   定义一些比较通用的pattern，在运行Pass/Pattern后自动触发，使IR更加简介且避免Pipeline过于臃肿。
+
+// 2. 常量折叠：    let hasFolder = 1;                // Op 生成 fold 函数
+//                 let hasConstantMaterializer = 1;  // Dialect 生成的Const
+//                 Operation 的函数
+int main() { CH14(); }
