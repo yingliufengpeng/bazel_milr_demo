@@ -7,7 +7,7 @@
 # For more details, please check https://github.com/bazelbuild/bazel/issues/18958
 ###############################################################################
 module(
-    name = "bazel_milr_demo",
+    name = "bazel_mlir_demo",
     version = "1.0.0",
 )
 
