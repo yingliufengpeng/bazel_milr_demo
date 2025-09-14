@@ -1,3 +1,13 @@
+//:bin/ch02.cpp_main
+//:bin/ch03.cpp_main
+//:bin/ch04.cpp_main
+//:bin/ch05.cpp_main
+//:bin/ch06.cpp_main
+//:bin/ch07.cpp_main
+//:bin/ch08.cpp_main
+//:bin/ch09.cpp_main
+//:bin/ch11.cpp_main
+//:bin/ch14.cpp_main
 //:gen_attr-interface_DistributeParallelismAttrInterfaces
 //:gen_attr-interface_DistributeParallelismAttrInterfaces_filegroup
 //:gen_attr-interface_DistributeParallelismAttrInterfaces_filegroup___gen_attr_interface_decls_-1205848285_genrule

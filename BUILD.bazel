@@ -1,5 +1,6 @@
 load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
 load(":gentbl_cc_lib.bzl", "gentbl_cc_lib", "gentbl_pass_cc_lib")
+load(":extension.bzl", "gen_ch_main_targets")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -217,3 +218,6 @@ cc_binary(
          "@llvm-project//mlir:CAPIDebug",
     ],
 )
+
+
+gen_ch_main_targets(glob(["bin/*.cpp"]), [":lib"])

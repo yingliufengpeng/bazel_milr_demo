@@ -13,6 +13,8 @@
     此代码的目的是为了学习 在llvm mlir中 集成bazel的相关知识,以及对mlir中相关模块的使用流程. 
 
 # 常用的命令为
+    bazelisk run //:bin/ch02.cpp_main
+    bazelisk run //:bin/ch14.cpp_main
     bazelisk run     //:main
     bazelisk run     //:peng-opt -- tests/softmax.mlir
     bazelisk test    //tests:Conversion/peng_to_linalg.mlir.test
