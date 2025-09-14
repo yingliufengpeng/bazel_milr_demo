@@ -6,7 +6,7 @@ include "mlir/IR/DialectBase.td"
 
 def Peng_Dialect : Dialect {
 
-    let name = "Peng";
+    let name = "peng";
 
     let summary = "";
 
