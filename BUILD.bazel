@@ -109,6 +109,16 @@ fusion_interface_name = gentbl_cc_lib(
     ],
 )
 
+peng_type_interface_name = gentbl_cc_lib(
+    "gen",
+    "type-interface",
+    "PengTypeInterface",
+    [
+        ":td_files",
+        ":{}".format(dialect_name),
+    ],
+)
+
 conversion_name = gentbl_pass_cc_lib(
     "gen_conversion",
     "Passes",
@@ -168,6 +178,7 @@ cc_library(
         ":{}".format(transform_name),
         ":{}".format(fusion_interface_name),
         ":{}".format(conversion_name),
+        ":{}".format(peng_type_interface_name),
         ":utils",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:AllExtensions",

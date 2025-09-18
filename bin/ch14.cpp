@@ -22,26 +22,38 @@
 #include "mlir/IR/Visitors.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/LLVM.h"
-namespace {
 
+namespace {
 } // namespace
 
 
 void CH14() {
-  mlir::DialectRegistry registry;
-  // 初始化上下文环境
-  mlir::MLIRContext context(registry);
-  context.disableMultithreading(true);
-  // 加载/注册方言
-  context.getOrLoadDialect<mlir::peng::PengDialect>();
-  context.getOrLoadDialect<mlir::func::FuncDialect>();
-  mlir::OpBuilder builder(&context);
-  auto loc = builder.getUnknownLoc();
-  auto type = mlir::peng::PTensorType::get(&context, {2, 2},
-                                                  builder.getF32Type(), 1);
-  auto const_op = builder.create<mlir::peng::ConstOp>(
-      loc, type, mlir::DenseElementsAttr::get(type, mlir::ArrayRef<float>{1.0, 2., 3., 4.}));
-  const_op->dump();
+    mlir::DialectRegistry registry;
+    // 初始化上下文环境
+    mlir::MLIRContext context(registry);
+    context.disableMultithreading(true);
+    // 加载/注册方言
+    context.getOrLoadDialect<mlir::peng::PengDialect>();
+    context.getOrLoadDialect<mlir::func::FuncDialect>();
+    mlir::OpBuilder builder(&context);
+    // ModuleOp
+    auto loc = builder.getUnknownLoc();
+    auto module = builder.create<mlir::ModuleOp>(loc, "Peng");
+    builder.setInsertionPointToStart(module.getBody());
+
+    auto type = mlir::peng::PTensorType::get(&context, {2, 2},
+                                             builder.getF32Type(), 1);
+
+    auto my_int_range = mlir::peng::MyIntRangeType::get(&context, 3, 43);
+    my_int_range.dump();
+    auto const_op = builder.create<mlir::peng::ConstOp>(
+        loc, type, mlir::DenseElementsAttr::get(type, mlir::ArrayRef<float>{1.0, 2., 3., 4.}));
+    const_op->dump();
+    auto my_op = builder.create<mlir::peng::MyOp>(loc, my_int_range, const_op);
+    my_op->dump();
+    std::cout << "ooo" << std::endl;
+    auto ex_op = builder.create<mlir::peng::ExpOp>(loc, my_op);
+    ex_op->dump();
 }
 
 // 1.规范化定义：   let hasCanonicalizeMethod = 1;    // Op 生成一个重写的函数

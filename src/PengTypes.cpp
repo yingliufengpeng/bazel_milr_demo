@@ -27,6 +27,7 @@ namespace mlir::peng {
       #define GET_TYPEDEF_LIST
       #include "PengTypes.cpp.inc"
             >();
+
     }
 
     ::llvm::LogicalResult PTensorType::verify(
@@ -91,6 +92,14 @@ namespace mlir::peng {
             }
         }
         return llvm::success();
+    }
+
+}
+
+namespace mlir::peng {
+
+    int64_t MyIntRangeType::getSize() {
+        return getHighIndex() - getLowIndex() + 1;
     }
 
 }

@@ -6,6 +6,7 @@ include "mlir/IR/Traits.td"
 include "mlir/IR/AttrTypeBase.td"
 include "PengDialect.td"
 include "mlir/IR/BuiltinTypeInterfaces.td"
+include "PengTypeInterface.td"
 
 class Peng_Type<string name, string typeMnemonic, list<Trait> traits = [],
                    string baseCppClass = "::mlir::Type">
@@ -109,5 +110,22 @@ def Peng_BufferType : Peng_Type<"Buffer","buffer",[]>{
 
 
 
+def MyIntRangeType : Peng_Type<"MyIntRange", "my_int_range", [HasSizeInterface]> {
+//  let cppNamespace = "::mlir::peng";
+     let parameters = (ins
+        "int64_t":$low_index,
+        "int64_t":$high_index
+      );
+
+  // 指定存储类
+  let storageClass = "MyIntRangeTypeStorage";
+
+  let extraClassDeclaration = [{
+        int64_t getSize();
+  }];
+
+  let assemblyFormat = "`<`$low_index`x`$high_index`>`";
+
+}
 
 #endif // DIALECT_PENG_TYPE

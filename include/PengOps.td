@@ -2,6 +2,8 @@
 #define DIALECT_PENG_OPS_TD
 include "mlir/IR/BuiltinAttributes.td"
 include "mlir/IR/OpBase.td"
+include "mlir/IR/Traits.td"
+
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/SymbolInterfaces.td"
@@ -11,6 +13,7 @@ include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 
 include "PengDialect.td"
+include "PengTypes.td"
 include "FusionRegionInterfaces.td"
 
 include "PengConstraints.td"
@@ -204,6 +207,29 @@ def Peng_ReturnOp : Peng_Op<"return", [Pure, HasParent<"DeviceKernelOp">, Return
 
   let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
   let hasVerifier = 0;
+}
+
+
+def MyOp : Peng_Op<"my_op", []> {
+  let summary = "Op using custom type";
+
+  // 输入使用自定义类型 MyIntType
+  let arguments = (ins
+    MyIntRangeType:$input
+  );
+
+  // 输出也可以是自定义类型
+  let results = (outs
+    MyIntRangeType:$output
+  );
+//    let builders = [
+//        OpBuilder<(ins "::mlir::Value":$input1) ,
+//            [{
+//                $_state.addOperands(input1);
+//                $_state.addTypes(input1.getType());
+//            }]>
+//
+//    ];
 }
 
 #endif // DIALECT_PENG_OPS_TD

@@ -4,6 +4,7 @@
 
 #ifndef BAZEL_MLIR_DEMO_PENGTYPES_H
 #define BAZEL_MLIR_DEMO_PENGTYPES_H
+#include "PengTypeInterface.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/IR/MLIRContext.h"
 
