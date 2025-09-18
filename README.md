@@ -1,3 +1,5 @@
+# 本工程通过bazel构建工具来学习llvm mlir相关技能.  
+    目前只是把相关有关的功能大致串联起来,并未能熟练使用.
 
 ## 构建指令
     https://github.com/yingliufengpeng/bazel_project2.git
